@@ -9,12 +9,12 @@ const GAME_COLS = 10;
 // variables
 
 let score = 0;
-let duration = 0;
+let duration = 1000;
 let downInterval;
 let tempMovingItem;
 
 const movingItem = {
-  type: "tree",
+  type: "",
   direction: 0,
   top: 0,
   left: 0,
@@ -28,7 +28,7 @@ const init = () => {
   for (let i = 0; i < GAME_ROWS; i++) {
     perpendNewLine();
   }
-  renderBlocks();
+  generateNewBlock();
 };
 
 // 격자 생성
@@ -63,7 +63,7 @@ const renderBlocks = (moveType = "") => {
     } else {
       tempMovingItem = { ...movingItem };
       setTimeout(() => {
-        renderBlocks();
+        renderBlocks("retry");
         if (moveType === "top") {
           seizeBlock();
         }
@@ -82,10 +82,31 @@ const seizeBlock = () => {
     moving.classList.remove("moving");
     moving.classList.add("seized");
   });
+  checkMatch();
+};
+const checkMatch = () => {
+  const childNodes = playground.childNodes;
+  childNodes.forEach((child) => {
+    let matched = true;
+    child.children[0].childNodes.forEach((li) => {
+      if (!li.classList.contains("seized")) {
+        matched = false;
+      }
+    });
+    if (matched) {
+      child.remove();
+      perpendNewLine();
+    }
+  });
   generateNewBlock();
 };
 
 const generateNewBlock = () => {
+  clearInterval(downInterval);
+  downInterval = setInterval(() => {
+    moveBlock("top", 1);
+  }, duration);
+
   const blockArray = Object.entries(BLOCKS);
   const randomIndex = Math.floor(Math.random() * blockArray.length);
   movingItem.type = blockArray[randomIndex][0];
@@ -114,6 +135,13 @@ const changeDirection = () => {
   renderBlocks();
 };
 
+const dropBlock = () => {
+  clearInterval(downInterval);
+  downInterval = setInterval(() => {
+    moveBlock("top", 1);
+  }, 5);
+};
+
 // event.handling
 document.addEventListener("keydown", (e) => {
   switch (e.key) {
@@ -128,6 +156,10 @@ document.addEventListener("keydown", (e) => {
       break;
     case "ArrowUp":
       changeDirection();
+      break;
+    case " ":
+      dropBlock();
+      break;
     default:
       break;
   }
