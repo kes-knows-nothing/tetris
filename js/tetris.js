@@ -1,7 +1,9 @@
 import BLOCKS from "./blocks.js";
 
 const playground = document.querySelector(".playground > ul");
-
+const gameText = document.querySelector(".game-text");
+const scoreDisplay = document.querySelector(".score");
+const restartButton = document.querySelector(".game-text > button");
 // Settubg
 const GAME_ROWS = 20;
 const GAME_COLS = 10;
@@ -62,6 +64,10 @@ const renderBlocks = (moveType = "") => {
       target.classList.add(type, "moving");
     } else {
       tempMovingItem = { ...movingItem };
+      if (moveType === "retry") {
+        clearInterval(downInterval);
+        showGameoverText();
+      }
       setTimeout(() => {
         renderBlocks("retry");
         if (moveType === "top") {
@@ -96,6 +102,7 @@ const checkMatch = () => {
     if (matched) {
       child.remove();
       perpendNewLine();
+      score++;
     }
   });
   generateNewBlock();
@@ -142,6 +149,10 @@ const dropBlock = () => {
   }, 5);
 };
 
+const showGameoverText = () => {
+  gameText.style.display = "flex";
+};
+
 // event.handling
 document.addEventListener("keydown", (e) => {
   switch (e.key) {
@@ -163,6 +174,12 @@ document.addEventListener("keydown", (e) => {
     default:
       break;
   }
+});
+
+restartButton.addEventListener("click", () => {
+  playground.innerHTML = "";
+  gameText.style.display = "none";
+  init();
 });
 
 init();
